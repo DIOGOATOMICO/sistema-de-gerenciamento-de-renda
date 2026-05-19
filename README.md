@@ -35,30 +35,26 @@ Estrutura do Projeto
 /dados.json      # Banco de dados local
 /run.bat         # Inicialização rápida no Windows
 Funcionalidades Futuras
-Sistema de autenticação
-Categorias de despesas
-Exportação de relatórios
-Metas financeiras
-Backup automático
-Tema escuro
-API REST
-
+•	Sistema de autenticação
+•	Categorias de despesas
+•	Exportação de relatórios
+•	Metas financeiras
+•	Backup automático
+•	Tema escuro
 funções novas
 -Suporte multiusuário- semi funcional 
-so mudar a < app.run(debug=False) > para < app.run(host="0.0.0.0", port=5000, debug=False) >
-fazendo isso app podera ser acessado por todos os dispositivos da rede local.
+•	só mudar a < app.run(debug=False) >  para < app.run(host="0.0.0.0", port=5000, debug=False)>
+•	fazendo isso app poderá ser acessado por todos os dispositivos da rede local.
 Instale as dependências:
-
 pip install flask
-
 Inicie a aplicação:
-
-python app.py
-
+python app.py 
+ou
+ run.bat
 Depois acesse:
-
 http://127.0.0.1:5000
 
 Este projeto está licenciado sob a GNU AGPL v3.
+
 
 <img width="517" height="604" alt="image" src="https://github.com/user-attachments/assets/5fb8742d-4197-4014-ba88-62fca85cffc1" />
