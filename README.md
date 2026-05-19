@@ -56,6 +56,7 @@ python app.py
 Depois acesse:
 
 http://127.0.0.1:5000
-Licença
 
 Este projeto está licenciado sob a GNU AGPL v3.
+
+<img width="517" height="604" alt="image" src="https://github.com/user-attachments/assets/5fb8742d-4197-4014-ba88-62fca85cffc1" />
