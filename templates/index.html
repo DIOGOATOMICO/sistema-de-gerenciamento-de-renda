@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Controle Financeiro</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<h1>Controle de Renda</h1>
+
+<form method="POST" action="/add">
+    <input type="text" name="descricao" placeholder="Gasto">
+    <input type="number" step="0.01" name="valor" placeholder="Valor">
+    <input type="number" step="0.01" name="renda" placeholder="Renda">
+    <button type="submit">Adicionar</button>
+</form>
+
+<h2>Histórico</h2>
+<ul>
+    {% for r in dados %}
+        <li>
+            Recebeu: R$ {{r.renda}} |
+            Gastou: {{r.gasto.descricao}} - R$ {{r.gasto.valor}} |
+            Sobra: R$ {{r.renda - r.gasto.valor}}
+        </li>
+    {% endfor %}
+</ul>
+
+<h2>Gráfico</h2>
+<canvas id="grafico"></canvas>
+
+<script>
+const dados = {{ dados|tojson }};
+
+let labels = [];
+let rendas = [];
+let gastos = [];
+
+dados.forEach((d, i) => {
+    labels.push("Registro " + (i+1));
+    rendas.push(d.renda);
+    gastos.push(d.gasto.valor);
+});
+
+new Chart(document.getElementById("grafico"), {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Renda',
+                data: rendas
+            },
+            {
+                label: 'Gastos',
+                data: gastos
+            }
+        ]
+    }
+});
+</script>
+
+<h2>Dashboard Mensal</h2>
+<canvas id="graficoMensal"></canvas>
+
+<script>
+const mensal = {{ mensal|tojson }};
+
+let meses = [];
+let rendaMes = [];
+let gastoMes = [];
+let sobraMes = [];
+
+mensal.forEach(m => {
+    meses.push(m.mes);
+    rendaMes.push(m.renda);
+    gastoMes.push(m.gasto);
+    sobraMes.push(m.sobra);
+});
+
+new Chart(document.getElementById("graficoMensal"), {
+    type: 'line',
+    data: {
+        labels: meses,
+        datasets: [
+            {
+                label: 'Renda',
+                data: rendaMes
+            },
+            {
+                label: 'Gastos',
+                data: gastoMes
+            },
+            {
+                label: 'Sobra',
+                data: sobraMes
+            }
+        ]
+    }
+});
+</script>
+
+</body>
+</html>
