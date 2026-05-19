@@ -3,102 +3,284 @@
 <head>
     <title>Controle Financeiro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        h2 {
+            color: #555;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        input, select {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        select {
+            cursor: pointer;
+        }
+        
+        button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        ul {
+            list-style: none;
+        }
+        
+        li {
+            padding: 15px;
+            margin: 10px 0;
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        li span {
+            margin: 0 10px;
+        }
+        
+        .renda {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .gasto {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .sobra {
+            color: #2980b9;
+            font-weight: bold;
+        }
+        
+        canvas {
+            margin: 20px 0;
+            max-height: 400px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+    </style>
 </head>
 <body>
 
-<h1>Controle de Renda</h1>
-
-<form method="POST" action="/add">
-    <input type="text" name="descricao" placeholder="Gasto">
-    <input type="number" step="0.01" name="valor" placeholder="Valor">
-    <input type="number" step="0.01" name="renda" placeholder="Renda">
-    <button type="submit">Adicionar</button>
-</form>
-
-<h2>Histórico</h2>
-<ul>
-    {% for r in dados %}
-        <li>
-            Recebeu: R$ {{r.renda}} |
-            Gastou: {{r.gasto.descricao}} - R$ {{r.gasto.valor}} |
-            Sobra: R$ {{r.renda - r.gasto.valor}}
-        </li>
-    {% endfor %}
-</ul>
-
-<h2>Gráfico</h2>
-<canvas id="grafico"></canvas>
-
-<script>
-const dados = {{ dados|tojson }};
-
-let labels = [];
-let rendas = [];
-let gastos = [];
-
-dados.forEach((d, i) => {
-    labels.push("Registro " + (i+1));
-    rendas.push(d.renda);
-    gastos.push(d.gasto.valor);
-});
-
-new Chart(document.getElementById("grafico"), {
-    type: 'bar',
-    data: {
-        labels: labels,
-        datasets: [
-            {
-                label: 'Renda',
-                data: rendas
-            },
-            {
-                label: 'Gastos',
-                data: gastos
+<div class="container">
+    <h1>💰 Controle de Renda</h1>
+    
+    <form method="POST" action="/add">
+        <select name="tipo" required>
+            <option value="">Selecione o tipo...</option>
+            <option value="renda">📈 Renda</option>
+            <option value="gasto">📉 Gasto</option>
+        </select>
+        <input type="text" name="descricao" placeholder="Descrição (opcional)">
+        <input type="number" step="0.01" name="valor" placeholder="Valor" required>
+        <button type="submit">✅ Adicionar</button>
+    </form>
+    
+    <h2>📋 Histórico</h2>
+    {% if dados %}
+        <ul>
+            {% for r in dados %}
+                <li>
+                    {% if r.tipo == 'renda' %}
+                        <span class="renda">📈 Renda: R$ {{ "%.2f"|format(r.valor) }}</span>
+                    {% else %}
+                        <span class="gasto">📉 Gasto: {{ r.descricao }} - R$ {{ "%.2f"|format(r.valor) }}</span>
+                    {% endif %}
+                    <span style="color: #999; font-size: 12px;">{{ r.data }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p style="text-align: center; color: #999; padding: 20px;">Nenhum registro ainda.</p>
+    {% endif %}
+    
+    <h2>📊 Gráfico Individual</h2>
+    <div class="chart-container">
+        <canvas id="grafico"></canvas>
+    </div>
+    
+    <script>
+    const dados = {{ dados|tojson }};
+    
+    let labels = [];
+    let rendas = [];
+    let gastos = [];
+    
+    dados.forEach((d, i) => {
+        labels.push("Reg " + (i+1));
+        if (d.tipo === 'renda') {
+            rendas.push(d.valor);
+            gastos.push(0);
+        } else {
+            rendas.push(0);
+            gastos.push(d.valor);
+        }
+    });
+    
+    new Chart(document.getElementById("grafico"), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Renda',
+                    data: rendas,
+                    backgroundColor: '#27ae60'
+                },
+                {
+                    label: 'Gastos',
+                    data: gastos,
+                    backgroundColor: '#e74c3c'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
             }
-        ]
-    }
-});
-</script>
-
-<h2>Dashboard Mensal</h2>
-<canvas id="graficoMensal"></canvas>
-
-<script>
-const mensal = {{ mensal|tojson }};
-
-let meses = [];
-let rendaMes = [];
-let gastoMes = [];
-let sobraMes = [];
-
-mensal.forEach(m => {
-    meses.push(m.mes);
-    rendaMes.push(m.renda);
-    gastoMes.push(m.gasto);
-    sobraMes.push(m.sobra);
-});
-
-new Chart(document.getElementById("graficoMensal"), {
-    type: 'line',
-    data: {
-        labels: meses,
-        datasets: [
-            {
-                label: 'Renda',
-                data: rendaMes
-            },
-            {
-                label: 'Gastos',
-                data: gastoMes
-            },
-            {
-                label: 'Sobra',
-                data: sobraMes
+        }
+    });
+    </script>
+    
+    <h2>📈 Dashboard Mensal</h2>
+    <div class="chart-container">
+        <canvas id="graficoMensal"></canvas>
+    </div>
+    
+    <script>
+    const mensal = {{ mensal|tojson }};
+    
+    let meses = [];
+    let rendaMes = [];
+    let gastoMes = [];
+    let sobraMes = [];
+    
+    mensal.forEach(m => {
+        meses.push(m.mes);
+        rendaMes.push(m.renda);
+        gastoMes.push(m.gasto);
+        sobraMes.push(m.sobra);
+    });
+    
+    new Chart(document.getElementById("graficoMensal"), {
+        type: 'line',
+        data: {
+            labels: meses,
+            datasets: [
+                {
+                    label: 'Renda',
+                    data: rendaMes,
+                    borderColor: '#27ae60',
+                    backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                    tension: 0.4
+                },
+                {
+                    label: 'Gastos',
+                    data: gastoMes,
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    tension: 0.4
+                },
+                {
+                    label: 'Sobra',
+                    data: sobraMes,
+                    borderColor: '#2980b9',
+                    backgroundColor: 'rgba(41, 128, 185, 0.1)',
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
             }
-        ]
-    }
-});
-</script>
+        }
+    });
+    </script>
+</div>
 
 </body>
 </html>
