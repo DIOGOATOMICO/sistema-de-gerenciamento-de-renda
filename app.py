@@ -3,37 +3,66 @@ import json
 import os
 from datetime import datetime
 from collections import defaultdict
+from pathlib import Path
+import logging
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ARQUIVO = os.path.join(BASE_DIR, "dados.json") 
+# Configuration
+BASE_DIR = Path(__file__).parent
+ARQUIVO = BASE_DIR / "dados.json"
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
 def carregar():
-    if os.path.exists(ARQUIVO):
+    """Load financial data from JSON file."""
+    if ARQUIVO.exists():
         try:
             with open(ARQUIVO, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, IOError) as e:
+            logger.error(f"Error loading file: {e}")
             return []
     return []
 
 def salvar(dados):
-    with open(ARQUIVO, "w", encoding="utf-8") as f:
-        json.dump(dados, f, indent=4, ensure_ascii=False)
+    """Save financial data with atomic write to prevent corruption."""
+    try:
+        temp_file = ARQUIVO.with_suffix(".tmp")
+        with open(temp_file, "w", encoding="utf-8") as f:
+            json.dump(dados, f, indent=4, ensure_ascii=False)
+        os.replace(temp_file, ARQUIVO)
+        return True
+    except IOError as e:
+        logger.error(f"Error saving file: {e}")
+        return False
 
 def agrupar_por_mes(dados):
+    """Group financial data by month."""
     meses = defaultdict(lambda: {"renda": 0, "gasto": 0})
 
     for d in dados:
         try:
             data = datetime.fromisoformat(d["data"])
         except (KeyError, ValueError, TypeError):
+            logger.warning(f"Invalid date format in record: {d}")
             continue
 
         chave = data.strftime("%Y-%m")
-        meses[chave]["renda"] += d.get("renda", 0)
-        meses[chave]["gasto"] += d.get("gasto", {}).get("valor", 0)
+        
+        # Handle both old and new data structures
+        if "tipo" in d:
+            # New structure: separate renda/gasto
+            if d["tipo"] == "renda":
+                meses[chave]["renda"] += d.get("valor", 0)
+            elif d["tipo"] == "gasto":
+                meses[chave]["gasto"] += d.get("valor", 0)
+        else:
+            # Old structure: combined renda/gasto
+            meses[chave]["renda"] += d.get("renda", 0)
+            meses[chave]["gasto"] += d.get("gasto", {}).get("valor", 0)
 
     resultado = []
     for mes, valores in meses.items():
@@ -57,24 +86,39 @@ def add():
     dados = carregar()
 
     try:
-        renda = float(request.form.get("renda", 0))
-        descricao = request.form.get("descricao", "sem descrição")
+        tipo = request.form.get("tipo")
+        if tipo not in ["renda", "gasto"]:
+            logger.warning(f"Invalid type received: {tipo}")
+            return "Tipo inválido (deve ser 'renda' ou 'gasto')", 400
+        
         valor = float(request.form.get("valor", 0))
-    except:
+        if valor <= 0:
+            return "Valor deve ser maior que zero", 400
+        
+        descricao = request.form.get("descricao", "sem descrição").strip()
+        if not descricao:
+            descricao = "sem descrição"
+            
+    except ValueError as e:
+        logger.error(f"Error converting values: {e}")
+        return "Erro nos dados enviados (valor inválido)", 400
+    except Exception as e:
+        logger.error(f"Unexpected error in add route: {e}")
         return "Erro nos dados enviados", 400
 
     registro = {
-        "renda": renda,
-        "gasto": {
-            "descricao": descricao,
-            "valor": valor
-        },
+        "tipo": tipo,
+        "descricao": descricao,
+        "valor": valor,
         "data": datetime.now().isoformat()
     }
 
     dados.append(registro)
-    salvar(dados)
-
+    
+    if not salvar(dados):
+        return "Erro ao salvar dados", 500
+    
+    logger.info(f"Record added: {tipo} - {valor} - {descricao}")
     return redirect("/")
 
 if __name__ == "__main__":
