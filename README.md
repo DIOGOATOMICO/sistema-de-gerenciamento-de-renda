@@ -40,11 +40,13 @@ Categorias de despesas
 Exportação de relatórios
 Metas financeiras
 Backup automático
-Suporte multiusuário
 Tema escuro
 API REST
-Execução Local
 
+funções novas
+-Suporte multiusuário- semi funcional 
+so mudar a < app.run(debug=False) > para < app.run(host="0.0.0.0", port=5000, debug=False) >
+fazendo isso app podera ser acessado por todos os dispositivos da rede local.
 Instale as dependências:
 
 pip install flask
