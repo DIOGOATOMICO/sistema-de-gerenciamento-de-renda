@@ -41,11 +41,14 @@ Funcionalidades Futuras
 •	Metas financeiras
 •	Backup automático
 •	Tema escuro
+
 funções novas
 -Suporte multiusuário- semi funcional 
 •	só mudar a < app.run(debug=False) >  para < app.run(host="0.0.0.0", port=5000, debug=False)>
+
 •	fazendo isso app poderá ser acessado por todos os dispositivos da rede local.
 Instale as dependências:
+
 pip install flask
 Inicie a aplicação:
 python app.py 
