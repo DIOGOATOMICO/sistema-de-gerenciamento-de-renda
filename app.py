@@ -75,11 +75,27 @@ def agrupar_por_mes(dados):
 
     return sorted(resultado, key=lambda x: x["mes"])
 
+
+def calcular_saldo(dados):
+    """Calculate current balance from all records."""
+    saldo = 0.0
+    for d in dados:
+        if d.get("tipo") == "renda":
+            saldo += d.get("valor", 0)
+        elif d.get("tipo") == "gasto":
+            saldo -= d.get("valor", 0)
+        else:
+            saldo += d.get("renda", 0)
+            saldo -= d.get("gasto", {}).get("valor", 0)
+    return saldo
+
+
 @app.route("/")
 def index():
     dados = carregar()
     mensal = agrupar_por_mes(dados)
-    return render_template("index.html", dados=dados, mensal=mensal)
+    saldo = calcular_saldo(dados)
+    return render_template("index.html", dados=dados, mensal=mensal, saldo=saldo)
 
 @app.route("/add", methods=["POST"])
 def add():
@@ -122,4 +138,4 @@ def add():
     return redirect("/")
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(host="0.0.0.0", port=5000, debug=False)

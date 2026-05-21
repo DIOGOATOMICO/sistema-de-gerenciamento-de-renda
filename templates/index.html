@@ -173,39 +173,94 @@
     <div class="chart-container">
         <canvas id="grafico"></canvas>
     </div>
-    
+    <h3 style="color: #555; margin-top: 20px;">Saldo Atual: <span class="sobra">R$ {{ "%.2f"|format(saldo) }}</span></h3>
+    <h2>📈 Dashboard Mensal</h2>
+    <div class="chart-container">
+        <canvas id="graficoMensal"></canvas>
+    </div>
+    <h3 style="color: #555; margin-top: 20px;">Saldo Mensal Atual: <span class="sobra">R$ {{ "%.2f"|format(mensal[-1].sobra if mensal else 0) }}</span></h3>
+    <h2 style="color: #555; margin-top: 30px;">📉 Últimos 5 Registros</h2>
+    {% if dados|length > 0 %}
+        <ul>
+            {% for r in dados[-5:] %}
+                <li>
+                    {% if r.tipo == 'renda' %}
+                        <span class="renda">📈 Renda: R$ {{ "%.2f"|format(r.valor) }}</span>
+                    {% else %}
+                        <span class="gasto">📉 Gasto: {{ r.descricao }} - R$ {{ "%.2f"|format(r.valor) }}</span>
+                    {% endif %}
+                    <span style="color: #999; font-size: 12px;">{{ r.data }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p style="text-align: center; color: #999; padding: 20px;">Nenhum registro ainda.</p>
+    {% endif %}
+    <h1 style="color: #333; margin-top: 40px; text-align: center;">📊 dicas para melhorar seu controle financeiro</h1>
+    <ul>
+        <li>💡 <strong>Defina metas claras:</strong> Estabeleça objetivos financeiros específicos, como economizar para uma viagem ou pagar dívidas, para manter o foco e a motivação.</li>
+        <li>📊 <strong>Acompanhe seus gastos:</strong> Use aplicativos ou planilhas para monitorar suas despesas diárias e identificar áreas onde pode economizar.</li>
+        <li>💳 <strong>Evite compras impulsivas:</strong> Antes de comprar algo, pergunte-se se realmente precisa e se está dentro do seu orçamento.</li>
+        <li>📈 <strong>Invista em educação financeira:</strong> Leia livros, assista a vídeos ou participe de cursos para aprender mais sobre finanças pessoais e investimentos.</li>
+        <li>🛑 <strong>Corte gastos desnecessários:</strong> Analise suas despesas e elimine aquelas que não agregam valor à sua vida, como assinaturas que você não usa.</li>
+        <li>💰 <strong>Crie um fundo de emergência:</strong> Reserve uma quantia mensalmente para imprevistos, garantindo segurança financeira em situações inesperadas.</li>
+    </ul>
+    <footer>
+        <p style="text-align: center; color: #999; margin-top: 40px;">&copy; {{ current_year }} Controle Financeiro. projeto de codigo aberto.</p>
+        <p style="text-align: center; color: #999; font-size: 12px;">Desenvolvido por <a href="https://github.com/DIOGOATOMICO" target="_blank">DIOGOATOMICO</a></p>
+    </footer>
+    <script id="dados-data" type="application/json">{{ dados|tojson }}</script>
+    <script id="mensal-data" type="application/json">{{ mensal|tojson }}</script>
+
     <script>
-    const dados = {{ dados|tojson }};
-    
-    let labels = [];
-    let rendas = [];
-    let gastos = [];
-    
+    const dados = JSON.parse(document.getElementById("dados-data").textContent);
+    const mensal = JSON.parse(document.getElementById("mensal-data").textContent);
+
+    const labels = [];
+    const rendas = [];
+    const gastos = [];
+    const sobras = [];
+    let saldo = 0;
+
     dados.forEach((d, i) => {
-        labels.push("Reg " + (i+1));
+        labels.push("Reg " + (i + 1));
         if (d.tipo === 'renda') {
             rendas.push(d.valor);
             gastos.push(0);
+            saldo += d.valor;
         } else {
             rendas.push(0);
             gastos.push(d.valor);
+            saldo -= d.valor;
         }
+        sobras.push(saldo);
     });
-    
+
     new Chart(document.getElementById("grafico"), {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: labels,
             datasets: [
                 {
                     label: 'Renda',
                     data: rendas,
-                    backgroundColor: '#27ae60'
+                    borderColor: '#27ae60',
+                    backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                    tension: 0.4
                 },
                 {
                     label: 'Gastos',
                     data: gastos,
-                    backgroundColor: '#e74c3c'
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    tension: 0.4
+                },
+                {
+                    label: 'Sobra',
+                    data: sobras,
+                    borderColor: '#2980b9',
+                    backgroundColor: 'rgba(41, 128, 185, 0.1)',
+                    tension: 0.4
                 }
             ]
         },
@@ -219,28 +274,19 @@
             }
         }
     });
-    </script>
-    
-    <h2>📈 Dashboard Mensal</h2>
-    <div class="chart-container">
-        <canvas id="graficoMensal"></canvas>
-    </div>
-    
-    <script>
-    const mensal = {{ mensal|tojson }};
-    
-    let meses = [];
-    let rendaMes = [];
-    let gastoMes = [];
-    let sobraMes = [];
-    
+
+    const meses = [];
+    const rendaMes = [];
+    const gastoMes = [];
+    const sobraMes = [];
+
     mensal.forEach(m => {
         meses.push(m.mes);
         rendaMes.push(m.renda);
         gastoMes.push(m.gasto);
         sobraMes.push(m.sobra);
     });
-    
+
     new Chart(document.getElementById("graficoMensal"), {
         type: 'line',
         data: {
