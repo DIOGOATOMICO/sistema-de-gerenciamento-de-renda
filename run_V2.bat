@@ -1,6 +1,4 @@
 
-python app.py && pause
-
 @echo off
 title Sistema de Gerenciamento de Renda
 
