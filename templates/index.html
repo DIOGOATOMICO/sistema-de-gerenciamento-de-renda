@@ -90,9 +90,11 @@
         
         ul {
             list-style: none;
+            padding: 0;
         }
         
-        li {
+        .record-list li,
+        .recent-list li {
             padding: 15px;
             margin: 10px 0;
             background: #f5f5f5;
@@ -102,6 +104,24 @@
             justify-content: space-between;
             align-items: center;
             font-size: 14px;
+        }
+        
+        .tips-list {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .tips-list li {
+            padding: 15px;
+            margin: 10px 0;
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+            font-size: 14px;
+            display: block;
+            text-align: left;
+            width: 100%;
         }
         
         li span {
@@ -153,7 +173,7 @@
     
     <h2>📋 Histórico</h2>
     {% if dados %}
-        <ul>
+        <ul class="record-list">
             {% for r in dados %}
                 <li>
                     {% if r.tipo == 'renda' %}
@@ -181,7 +201,7 @@
     <h3 style="color: #555; margin-top: 20px;">Saldo Mensal Atual: <span class="sobra">R$ {{ "%.2f"|format(mensal[-1].sobra if mensal else 0) }}</span></h3>
     <h2 style="color: #555; margin-top: 30px;">📉 Últimos 5 Registros</h2>
     {% if dados|length > 0 %}
-        <ul>
+        <ul class="recent-list">
             {% for r in dados[-5:] %}
                 <li>
                     {% if r.tipo == 'renda' %}
@@ -196,14 +216,14 @@
     {% else %}
         <p style="text-align: center; color: #999; padding: 20px;">Nenhum registro ainda.</p>
     {% endif %}
-    <h1 style="color: #333; margin-top: 40px; text-align: center;">📊 dicas para melhorar seu controle financeiro</h1>
-    <ul>
-        <li>💡 <strong>Defina metas claras:</strong> Estabeleça objetivos financeiros específicos, como economizar para uma viagem ou pagar dívidas, para manter o foco e a motivação.</li>
-        <li>📊 <strong>Acompanhe seus gastos:</strong> Use aplicativos ou planilhas para monitorar suas despesas diárias e identificar áreas onde pode economizar.</li>
-        <li>💳 <strong>Evite compras impulsivas:</strong> Antes de comprar algo, pergunte-se se realmente precisa e se está dentro do seu orçamento.</li>
-        <li>📈 <strong>Invista em educação financeira:</strong> Leia livros, assista a vídeos ou participe de cursos para aprender mais sobre finanças pessoais e investimentos.</li>
-        <li>🛑 <strong>Corte gastos desnecessários:</strong> Analise suas despesas e elimine aquelas que não agregam valor à sua vida, como assinaturas que você não usa.</li>
-        <li>💰 <strong>Crie um fundo de emergência:</strong> Reserve uma quantia mensalmente para imprevistos, garantindo segurança financeira em situações inesperadas.</li>
+    <h2 style="color: #555; margin-top: 40px;">📊 dicas para melhorar seu controle financeiro</h2>
+    <ul class="tips-list">
+        <li>💡<strong>Defina metas claras:</strong> Estabeleça objetivos financeiros específicos, como economizar para uma viagem ou pagar dívidas, para manter o foco e a motivação.</li>
+        <li>📊<strong>Acompanhe seus gastos:</strong> Use aplicativos ou planilhas para monitorar suas despesas diárias e identificar áreas onde pode economizar.</li>
+        <li>💳<strong>Evite compras impulsivas:</strong> Antes de comprar algo, pergunte-se se realmente precisa e se está dentro do seu orçamento.</li>
+        <li>📈<strong>Invista em educação financeira:</strong> Leia livros, assista a vídeos ou participe de cursos para aprender mais sobre finanças pessoais e investimentos.</li>
+        <li>🛑<strong>Corte gastos desnecessários:</strong> Analise suas despesas e elimine aquelas que não agregam valor à sua vida, como assinaturas que você não usa.</li>
+        <li>💰<strong>Crie um fundo de emergência:</strong> Reserve uma quantia mensalmente para imprevistos, garantindo segurança financeira em situações inesperadas.</li>
     </ul>
     <footer>
         <p style="text-align: center; color: #999; margin-top: 40px;">&copy; {{ current_year }} Controle Financeiro. projeto de codigo aberto.</p>

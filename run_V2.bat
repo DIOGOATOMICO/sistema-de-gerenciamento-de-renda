@@ -42,9 +42,8 @@ echo  Iniciando Sistema de Gerenciamento
 echo =====================================
 echo.
 
-python app.py
+python app.py && pause
 
-pause
 exit
 
 :: Inicializacao usando py launcher
