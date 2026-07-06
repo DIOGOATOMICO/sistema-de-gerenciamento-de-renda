@@ -59,5 +59,9 @@ http://127.0.0.1:5000
 
 Este projeto está licenciado sob a GNU AGPL v3.
 
-
+   IMAGEM DA PRIMEIRA VERSAO
 <img width="517" height="604" alt="image" src="https://github.com/user-attachments/assets/5fb8742d-4197-4014-ba88-62fca85cffc1" />
+
+   IMAGEM DA SEGUNDA VERSAO
+<img width="347" height="665" alt="image" src="https://github.com/user-attachments/assets/10aee4be-41a8-4372-9651-df5775a7f44f" />
+
