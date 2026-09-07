@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
+# a declaracao de funcoes abaixo sao para carregar e salvar os dados do arquivo JSON, agrupar os dados por mes e calcular o saldo atual
 def carregar():
     """Load financial data from JSON file."""
     if ARQUIVO.exists():
@@ -75,7 +76,6 @@ def agrupar_por_mes(dados):
 
     return sorted(resultado, key=lambda x: x["mes"])
 
-
 def calcular_saldo(dados):
     """Calculate current balance from all records."""
     saldo = 0.0
@@ -89,7 +89,7 @@ def calcular_saldo(dados):
             saldo -= d.get("gasto", {}).get("valor", 0)
     return saldo
 
-
+# 
 @app.route("/")
 def index():
     dados = carregar()

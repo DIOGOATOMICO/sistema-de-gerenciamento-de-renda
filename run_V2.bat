@@ -9,6 +9,7 @@ echo.
 
 :: Verifica Python padrao
 python --version >nul 2>&1
+pip --version >nul 2>&1
 
 IF %ERRORLEVEL% EQU 0 (
     goto iniciar
